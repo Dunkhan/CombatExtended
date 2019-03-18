@@ -13,24 +13,19 @@ namespace CombatExtended.CombatExtended.Things
 
         public static void SyncTryStartReload(string thingID, string ammoType)
         {
-            AmmoDef ammo = DefDatabase<AmmoDef>.GetNamedSilentFail(ammoType);
-            if (ammo == null)
-            {
-                Log.Message("Reloadfailed - null ammo");
-                return;
-            }
             Pawn pawn = PawnsFinder.AllMaps_FreeColonists.FirstOrDefault(p => p.ThingID == thingID);
+            AmmoDef ammo = ammoType == "" ? null : DefDatabase<AmmoDef>.GetNamedSilentFail(ammoType);
             Building_TurretGunCE building;
+            CompAmmoUser compAmmo;
             if (pawn != null)
             {
-                CompAmmoUser compAmmo = pawn.equipment.Primary.TryGetComp<CompAmmoUser>();
-                if (compAmmo == null)
+                compAmmo = pawn.equipment.Primary.TryGetComp<CompAmmoUser>();
+                if (compAmmo != null && ammo != null)
                 {
-                    Log.Message("Reloadfailed - no ammo comp on pawn");
+                    compAmmo.SelectedAmmo = ammo;
+                    compAmmo.TryStartReload();
                     return;
                 }
-                compAmmo.SelectedAmmo = ammo;
-                compAmmo.TryStartReload();
             }
             else
             {
@@ -40,14 +35,17 @@ namespace CombatExtended.CombatExtended.Things
                     Log.Message("Reloadfailed - pawn or building not found " + thingID);
                     return;
                 }
-                CompAmmoUser compAmmo = building.CompAmmo;
-                if (compAmmo == null)
+                compAmmo = building.CompAmmo;
+                if (compAmmo != null && ammo != null)
                 {
-                    Log.Message("Reloadfailed - turret ammo comp not found");
+                    compAmmo.SelectedAmmo = ammo;
+                    compAmmo.turret.TryOrderReload();
                     return;
                 }
-                compAmmo.SelectedAmmo = ammo;
-                compAmmo.turret.TryOrderReload();
+            }
+            if (ammoType == "" && compAmmo != null)
+            {
+                compAmmo.TryUnload();
             }
         }
     }

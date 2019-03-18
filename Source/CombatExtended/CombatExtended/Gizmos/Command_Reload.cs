@@ -83,35 +83,37 @@ namespace CombatExtended
             var hasOperator = compAmmo.Wielder != null || (compAmmo.turret?.MannableComp?.MannedNow ?? false);
             if (compAmmo.UseAmmo && hasOperator && compAmmo.HasMagazine && compAmmo.CurMagCount > 0)
             {
-                floatOptionList.Add(new FloatMenuOption("CE_UnloadLabel".Translate(), new Action(delegate { compAmmo.TryUnload(); })));
+                floatOptionList.Add(new FloatMenuOption("CE_UnloadLabel".Translate(), new Action(delegate { this.TryStartSyncReload(); })));
             }
             // Append reload command
             if (compAmmo.HasMagazine && hasOperator)
             {
-                floatOptionList.Add(new FloatMenuOption("CE_ReloadLabel".Translate(), new Action(this.TryStartSyncReload)));
+                floatOptionList.Add(new FloatMenuOption("CE_ReloadLabel".Translate(), new Action(delegate { this.TryStartSyncReload(true); })));
             }
             return new FloatMenu(floatOptionList);
         }
 
-        public void TryStartSyncReload()
+        public void TryStartSyncReload(bool unload = false)
         {
             Log.Message("Checking multiplayer");
             if (MultiplayerSynchroniser.IsActive)
             {
                 Log.Message("Attempting to sync reload");
-                MultiplayerSynchroniser.SyncTryStartReload(this.compAmmo.Holder?.ThingID ?? this.compAmmo.turret.ThingID, this.compAmmo.SelectedAmmo.defName);
+                MultiplayerSynchroniser.SyncTryStartReload(this.compAmmo.Holder?.ThingID ?? this.compAmmo.turret.ThingID, unload ? "" : this.compAmmo.SelectedAmmo.defName);
             }
             else
             {
+                if (unload)
+                {
+                    compAmmo.TryUnload();
+                }
                 Log.Message("Multiplayer not active");
                 if (compAmmo.turret != null)
                 {
                     compAmmo.turret.TryOrderReload();
+                    return;
                 }
-                else
-                {
-                    compAmmo.TryStartReload();
-                }
+                compAmmo.TryStartReload();
             }
         }
     }
