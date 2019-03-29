@@ -94,10 +94,10 @@ namespace CombatExtended
             SoundDef soundDef;
             Pawn defender = targetThing as Pawn;
             //var hitRoll = Rand.Value;
-            if (Rand.Chance(GetHitChance(targetThing)))
+            if (CE_Utility.Chance(GetHitChance(targetThing)))
             {
                 // Check for dodge
-                if (!targetImmobile && !surpriseAttack && Rand.Chance(defender.GetStatValue(StatDefOf.MeleeDodgeChance)))
+                if (!targetImmobile && !surpriseAttack && CE_Utility.Chance(defender.GetStatValue(StatDefOf.MeleeDodgeChance)))
                 {
                     // Attack is evaded
                     result = false;
@@ -113,15 +113,15 @@ namespace CombatExtended
                     //var resultRoll = Rand.Value;
                     var parryBonus = 1 / EquipmentSource?.GetStatValue(CE_StatDefOf.MeleeCounterParryBonus) ?? 1;
                     var parryChance = GetComparativeChanceAgainst(defender, casterPawn, CE_StatDefOf.MeleeParryChance, BaseParryChance, parryBonus);
-                    if (!surpriseAttack && defender != null && CanDoParry(defender) && Rand.Chance(parryChance))
+                    if (!surpriseAttack && defender != null && CanDoParry(defender) && CE_Utility.Chance(parryChance))
                     {
                         // Attack is parried
                         Apparel shield = defender.apparel.WornApparel.FirstOrDefault(x => x is Apparel_Shield);
-                        bool isShieldBlock = shield != null && Rand.Chance(ShieldBlockChance);
+                        bool isShieldBlock = shield != null && CE_Utility.Chance(ShieldBlockChance);
                         Thing parryThing = isShieldBlock ? shield
                             : defender.equipment?.Primary ?? defender;
 
-                        if (Rand.Chance(GetComparativeChanceAgainst(defender, casterPawn, CE_StatDefOf.MeleeCritChance, BaseCritChance)))
+                        if (CE_Utility.Chance(GetComparativeChanceAgainst(defender, casterPawn, CE_StatDefOf.MeleeCritChance, BaseCritChance)))
                         {
                             // Do a riposte
                             DoParry(defender, parryThing, true);
@@ -148,7 +148,7 @@ namespace CombatExtended
                         BattleLogEntry_MeleeCombat log = this.CreateCombatLog((ManeuverDef maneuver) => maneuver.combatLogRulesHit, false);
 
                         // Attack connects
-                        if (surpriseAttack || Rand.Chance(GetComparativeChanceAgainst(casterPawn, defender, CE_StatDefOf.MeleeCritChance, BaseCritChance)))
+                        if (surpriseAttack || CE_Utility.Chance(GetComparativeChanceAgainst(casterPawn, defender, CE_StatDefOf.MeleeCritChance, BaseCritChance)))
                         {
                             // Do a critical hit
                             isCrit = true;
@@ -212,7 +212,7 @@ namespace CombatExtended
             DamageDef damDef = verbProps.meleeDamageDef;
             BodyPartGroupDef bodyPartGroupDef = null;
             HediffDef hediffDef = null;
-            damAmount = Rand.Range(damAmount * 0.8f, damAmount * 1.2f);
+            damAmount = CE_Utility.Range(damAmount * 0.8f, damAmount * 1.2f);
             if (base.CasterIsPawn)
             {
                 bodyPartGroupDef = this.verbProps.AdjustedLinkedBodyPartsGroup(this.tool);
@@ -253,7 +253,7 @@ namespace CombatExtended
             // Apply critical damage
             if (isCrit && !CasterPawn.def.race.Animal && verbProps.meleeDamageDef.armorCategory != DamageArmorCategoryDefOf.Sharp)
             {
-                var critAmount = GenMath.RoundRandom(mainDinfo.Amount * 0.25f);
+                var critAmount = (int)(mainDinfo.Amount * 0.25f);
                 var critDinfo = new DamageInfo(DamageDefOf.Stun, critAmount, armorPenetration, //Ignore armor //armorPenetration, //Armor Penetration
                     -1, caster, null, source);
                 critDinfo.SetBodyRegion(bodyRegion, BodyPartDepth.Outside);
@@ -418,7 +418,7 @@ namespace CombatExtended
             var casterReach = new CollisionVertical(CasterPawn).Max * 1.2f;
             var targetHeight = new CollisionVertical(pawn);
             BodyPartHeight maxHeight = targetHeight.GetRandWeightedBodyHeightBelow(casterReach);
-            BodyPartHeight height = (BodyPartHeight)Rand.RangeInclusive(1, (int)maxHeight);
+            BodyPartHeight height = (BodyPartHeight)CE_Utility.Range(0, (int)maxHeight+1);
             return height;
         }
 

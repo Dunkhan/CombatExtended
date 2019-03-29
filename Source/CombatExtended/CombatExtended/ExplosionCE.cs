@@ -172,19 +172,19 @@ namespace CombatExtended
 		private void AffectCell(IntVec3 c)
 		{
 			bool flag = this.ShouldCellBeAffectedOnlyByDamage(c);
-			if (!flag && Rand.Chance(this.preExplosionSpawnChance) && c.Walkable(base.Map)) {
+			if (!flag && CE_Utility.Chance(this.preExplosionSpawnChance) && c.Walkable(base.Map)) {
 				this.TrySpawnExplosionThing(this.preExplosionSpawnThingDef, c, this.preExplosionSpawnThingCount);
 			}
 			this.damType.Worker.ExplosionAffectCell(this, c, this.damagedThings, !flag);
-			if (!flag && Rand.Chance(this.postExplosionSpawnChance) && c.Walkable(base.Map)) {
+			if (!flag && CE_Utility.Chance(this.postExplosionSpawnChance) && c.Walkable(base.Map)) {
 				this.TrySpawnExplosionThing(this.postExplosionSpawnThingDef, c, this.postExplosionSpawnThingCount);
 			}
 			float num = this.chanceToStartFire;
 			if (this.damageFalloff) {
 				num *= Mathf.Lerp(1f, 0.2f, c.DistanceTo(base.Position) / this.radius);
 			}
-			if (Rand.Chance(num)) {
-				FireUtility.TryStartFireIn(c, base.Map, Rand.Range(0.1f, 0.925f));
+			if (CE_Utility.Chance(num)) {
+				FireUtility.TryStartFireIn(c, base.Map, CE_Utility.Range(0.1f, 0.925f));
 			}
 		}
 

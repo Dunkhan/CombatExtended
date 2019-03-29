@@ -40,7 +40,7 @@ namespace CombatExtended
             }
             float infectChance = Props.infectionChancePerHourUntended * (ticksUntended / GenDate.TicksPerHour); // Calculate base chance from time untreated
             if (parent.Part.depth == BodyPartDepth.Inside) infectChance *= infectionInnerModifier;  // Increase chance of infection for inner organs
-            if (Rand.Value < infectChance * infectionModifier)
+            if (CE_Utility.Value() < infectChance * infectionModifier)
             {
                 alreadyCausedInfection = true;
                 Pawn.health.AddHediff(HediffDefOf.WoundInfection, parent.Part);
@@ -69,7 +69,7 @@ namespace CombatExtended
                 && !Pawn.health.hediffSet.PartOrAnyAncestorHasDirectlyAddedParts(parent.Part) 
                 && !parent.IsPermanent())
             {
-                ticksUntilInfect = InfectionDelayHours.RandomInRange * GenDate.TicksPerHour;
+                ticksUntilInfect = CE_Utility.RandomInRange(InfectionDelayHours) * GenDate.TicksPerHour;
             }
         }
 

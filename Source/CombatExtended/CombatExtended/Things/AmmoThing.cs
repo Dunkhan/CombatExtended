@@ -59,7 +59,7 @@ namespace CombatExtended
             {
                 if (HitPoints - dinfo.Amount > 0)
                 {
-                    numToCookOff += Mathf.RoundToInt(def.stackLimit * ((float)dinfo.Amount / HitPoints) * (def.smallVolume ? Rand.Range(1f, 2f) : Rand.Range(0.0f, 1f)));
+                    numToCookOff += Mathf.RoundToInt(def.stackLimit * ((float)dinfo.Amount / HitPoints) * (def.smallVolume ? CE_Utility.Range(1f, 2f) : CE_Utility.Range(0.0f, 1f)));
                 }
                 else TryDetonate(Mathf.Lerp(1, Mathf.Min(5, stackCount), stackCount / def.stackLimit));
             }
@@ -73,7 +73,7 @@ namespace CombatExtended
             base.Tick();
 
             // Cook off ammo based on how much damage we've taken so far
-            if (numToCookOff > 0 && Rand.Chance((float)numToCookOff / def.stackLimit))
+            if (numToCookOff > 0 && CE_Utility.Chance((float)numToCookOff / def.stackLimit))
             {
                 if(TryLaunchCookOffProjectile() || TryDetonate())
                 {
@@ -97,7 +97,7 @@ namespace CombatExtended
             CompExplosiveCE comp = this.TryGetComp<CompExplosiveCE>();
             if (comp != null)
             {
-            	if(Rand.Chance(Mathf.Clamp01(0.75f - Mathf.Pow(HitPoints / MaxHitPoints, 2)))) comp.Explode(this, Position.ToVector3Shifted(), Map, scale);
+            	if(CE_Utility.Chance(Mathf.Clamp01(0.75f - Mathf.Pow(HitPoints / MaxHitPoints, 2)))) comp.Explode(this, Position.ToVector3Shifted(), Map, scale);
                 return true;
             }
             return false;
@@ -119,8 +119,8 @@ namespace CombatExtended
                 projectile.logMisses = false;
                 projectile.Launch(this,
                     new Vector2(DrawPos.x, DrawPos.z),
-                    Mathf.Acos(2 * UnityEngine.Random.Range(0.5f, 1f) - 1),
-                    UnityEngine.Random.Range(0, 360),
+                    Mathf.Acos(2 * CE_Utility.Range(0.5f, 1f) - 1),
+                    CE_Utility.Range(0, 360),
                     0.1f,
                     AmmoDef.cookOffProjectile.projectile.speed * AmmoDef.cookOffSpeed,
                     this);

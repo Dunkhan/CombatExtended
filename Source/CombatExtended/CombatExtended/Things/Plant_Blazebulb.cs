@@ -25,8 +25,8 @@ namespace CombatExtended
             if (temperature > IgnitionTemp)
             {
                 float ignitionChance = 0.005f * Mathf.Pow((temperature - IgnitionTemp), 2);
-                float rand = UnityEngine.Random.value;
-                if(UnityEngine.Random.value < ignitionChance)
+                float rand = CE_Utility.Value();
+                if(CE_Utility.Value() < ignitionChance)
                 {
                     FireUtility.TryStartFireIn(Position, base.Map, 0.1f);
                 }

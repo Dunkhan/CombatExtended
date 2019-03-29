@@ -128,7 +128,7 @@ namespace CombatExtended
 
         public BodyPartHeight GetRandWeightedBodyHeightBelow(float threshold)
         {
-            return GetCollisionBodyHeight(Rand.Range(Min, threshold));
+            return GetCollisionBodyHeight(CE_Utility.Range(Min, threshold));
         }
     }
 }

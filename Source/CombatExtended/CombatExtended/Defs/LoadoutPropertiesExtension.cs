@@ -83,7 +83,7 @@ namespace CombatExtended
             {
                 LoadWeaponWithRandAmmo(primary);
                 inventory.UpdateInventory();    // Inventory load changed, need to update
-                TryGenerateAmmoFor(pawn.equipment.Primary, inventory, Mathf.RoundToInt(primaryMagazineCount.RandomInRange));
+                TryGenerateAmmoFor(pawn.equipment.Primary, inventory, Mathf.RoundToInt(CE_Utility.RandomInRange(primaryMagazineCount)));
             }
 
             // Generate shield
@@ -101,13 +101,13 @@ namespace CombatExtended
 
         private void TryGenerateWeaponWithAmmoFor(Pawn pawn, CompInventory inventory, SidearmOption option)
         {
-            if (option.weaponTags.NullOrEmpty() || !Rand.Chance(option.generateChance))
+            if (option.weaponTags.NullOrEmpty() || !CE_Utility.Chance(option.generateChance))
             {
                 return;
             }
             // Generate weapon - mostly based on PawnWeaponGenerator.TryGenerateWeaponFor()
             // START 1:1 COPY
-            float randomInRange = pawn.kindDef.weaponMoney.RandomInRange;
+            float randomInRange = CE_Utility.RandomInRange(pawn.kindDef.weaponMoney);
             for (int i = 0; i < allWeaponPairs.Count; i++)
             {
                 ThingStuffPair w = allWeaponPairs[i];
@@ -115,7 +115,7 @@ namespace CombatExtended
                 {
                     if (option.weaponTags == null || option.weaponTags.Any((string tag) => w.thing.weaponTags.Contains(tag)))
                     {
-                        if (w.thing.generateAllowChance >= 1f || Rand.ChanceSeeded(w.thing.generateAllowChance, pawn.thingIDNumber ^ (int)w.thing.shortHash ^ 28554824))
+                        if (w.thing.generateAllowChance >= 1f || CE_Utility.ChanceSeeded(w.thing.generateAllowChance, pawn.thingIDNumber ^ (int)w.thing.shortHash ^ 28554824))
                         {
                             workingWeapons.Add(w);
                         }
@@ -130,7 +130,7 @@ namespace CombatExtended
             // pawn.equipment.DestroyAllEquipment(DestroyMode.Vanish); --removed compared to sourcecode
             // Some 1:1 COPY below
             ThingStuffPair thingStuffPair;
-            if (workingWeapons.TryRandomElementByWeight((ThingStuffPair w) => w.Commonality * w.Price, out thingStuffPair))
+            if (CE_Utility.TryRandomElementByWeight(workingWeapons,(ThingStuffPair w) => w.Commonality * w.Price, out thingStuffPair))
             {
                 // Create the actual weapon and put it into inventory
                 ThingWithComps thingWithComps = (ThingWithComps)ThingMaker.MakeThing(thingStuffPair.thing, thingStuffPair.stuff);
@@ -141,7 +141,7 @@ namespace CombatExtended
                     PawnGenerator.PostProcessGeneratedGear(thingWithComps, pawn);
                     if (inventory.container.TryAdd(thingWithComps)) //Custom
                     {
-                        TryGenerateAmmoFor(thingWithComps, inventory, Mathf.RoundToInt(option.magazineCount.RandomInRange)); //Custom
+                        TryGenerateAmmoFor(thingWithComps, inventory, Mathf.RoundToInt(CE_Utility.RandomInRange(option.magazineCount))); //Custom
                     }
                 }
             }
@@ -159,7 +159,7 @@ namespace CombatExtended
             }
             // Determine ammo
             IEnumerable<AmmoDef> availableAmmo = compAmmo.Props.ammoSet.ammoTypes.Where(a => a.ammo.alwaysHaulable).Select(a => a.ammo); //Running out of options. alwaysHaulable does exist in xml.
-            AmmoDef ammoToLoad = availableAmmo.RandomElementByWeight(a => a.generateCommonality);
+            AmmoDef ammoToLoad = CE_Utility.RandomElementByWeight(availableAmmo, a => a.generateCommonality);
             compAmmo.ResetAmmoCount(ammoToLoad);
         }
 
@@ -201,15 +201,15 @@ namespace CombatExtended
             if ((primary != null && !primary.def.weaponTags.Contains(Apparel_Shield.OneHandedTag))
                 || shieldTags.NullOrEmpty()
                 || pawn.apparel == null
-                || !Rand.Chance(shieldChance))
+                || !CE_Utility.Chance(shieldChance))
                 return;
 
-            var money = shieldMoney.RandomInRange;
+            var money = CE_Utility.RandomInRange(shieldMoney);
             foreach(ThingStuffPair cur in allShieldPairs)
             {
                 if(cur.Price < money
                     && shieldTags.Any(t => cur.thing.apparel.tags.Contains(t))
-                    && (cur.thing.generateAllowChance >= 1f || Rand.ValueSeeded(pawn.thingIDNumber ^ 68715844) <= cur.thing.generateAllowChance)
+                    && (cur.thing.generateAllowChance >= 1f || CE_Utility.ValueSeeded(pawn.thingIDNumber ^ 68715844) <= cur.thing.generateAllowChance)
                     && pawn.apparel.CanWearWithoutDroppingAnything(cur.thing))
                 {
                     workingShields.Add(cur);
@@ -217,7 +217,7 @@ namespace CombatExtended
             }
             if (workingShields.Count == 0) return;
             ThingStuffPair pair;
-            if (workingShields.TryRandomElementByWeight(p => p.Commonality * p.Price, out pair))
+            if (CE_Utility.TryRandomElementByWeight(workingShields, p => p.Commonality * p.Price, out pair))
             {
                 var shield = (Apparel)ThingMaker.MakeThing(pair.thing, pair.stuff);
                 int count;

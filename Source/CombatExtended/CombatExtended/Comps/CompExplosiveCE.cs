@@ -80,14 +80,14 @@ namespace CombatExtended
                         
                         projectile.canTargetSelf = true;
             			projectile.minCollisionSqr = 1f;
-            				//TODO : Don't hardcode at FragmentShadowChance, make XML-modifiable
-            			projectile.castShadow = (UnityEngine.Random.value < FragmentShadowChance);
+                        //TODO : Don't hardcode at FragmentShadowChance, make XML-modifiable
+            			projectile.castShadow = (CE_Utility.Value() < FragmentShadowChance);
             			projectile.logMisses = false;
             			projectile.Launch(
             				instigator,
             				exactOrigin,
-                            Mathf.Acos(2 * range.RandomInRange - 1),
-            				UnityEngine.Random.Range(0, 360),
+                            Mathf.Acos(2 * (CE_Utility.RandomInRange(range) - 1)),
+            				CE_Utility.Range(0, 360),
             				height,
             				Props.fragSpeedFactor * projectile.def.projectile.speed,
             				projCE
@@ -106,7 +106,7 @@ namespace CombatExtended
                 explosion.radius = Props.explosionRadius * scaleFactor;
                 explosion.damType = Props.explosionDamageDef;
                 explosion.instigator = instigator;
-                explosion.damAmount = GenMath.RoundRandom(Props.explosionDamage * scaleFactor);
+                explosion.damAmount = (int)(Props.explosionDamage * scaleFactor);
                 explosion.weapon = null;
                 explosion.projectile = parent.def;
                 explosion.preExplosionSpawnThingDef = Props.preExplosionSpawnThingDef;

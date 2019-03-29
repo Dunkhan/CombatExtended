@@ -109,6 +109,7 @@ namespace CombatExtended
 		}
     	#endregion
     	
+
         #region Misc
         public static List<ThingDef> allWeaponDefs = new List<ThingDef>();
 
@@ -118,9 +119,8 @@ namespace CombatExtended
         public static Vector2 GenRandInCircle(float radius)
         {
             //Fancy math to get random point in circle
-            System.Random rand = new System.Random();
-            double angle = rand.NextDouble() * Math.PI * 2;
-            double range = Math.Sqrt(rand.NextDouble()) * radius;
+            double angle = Value() * Math.PI * 2;
+            double range = Math.Sqrt(Value()) * radius;
             return new Vector2((float)(range * Math.Cos(angle)), (float)(range * Math.Sin(angle)));
         }
 
@@ -132,7 +132,7 @@ namespace CombatExtended
         public static float GetMoveSpeed(Pawn pawn)
         {
             float movePerTick = 60 / pawn.GetStatValue(StatDefOf.MoveSpeed, false);    //Movement per tick
-            movePerTick +=  pawn.Map.pathGrid.CalculatedCostAt(pawn.Position, false, pawn.Position);
+            movePerTick += pawn.Map.pathGrid.CalculatedCostAt(pawn.Position, false, pawn.Position);
             Building edifice = pawn.Position.GetEdifice(pawn.Map);
             if (edifice != null)
             {
@@ -167,10 +167,10 @@ namespace CombatExtended
             }
             return 60 / movePerTick;
         }
-        
+
         public static float ClosestDistBetween(Vector2 origin, Vector2 destination, Vector2 target)
         {
-        	return Mathf.Abs((destination.y - origin.y) * target.x - (destination.x - origin.x) * target.y + destination.x * origin.y - destination.y * origin.x) / (destination - origin).magnitude;
+            return Mathf.Abs((destination.y - origin.y) * target.x - (destination.x - origin.x) * target.y + destination.x * origin.y - destination.y * origin.x) / (destination - origin).magnitude;
         }
 
         /// <summary>
@@ -180,7 +180,7 @@ namespace CombatExtended
         /// <returns>Turret operator if one is found, null if not</returns>
         public static Pawn TryGetTurretOperator(Thing thing)
         {
-        	// Building_TurretGunCE DOES NOT inherit from Building_TurretGun!!!
+            // Building_TurretGunCE DOES NOT inherit from Building_TurretGun!!!
             if (thing is Building_Turret)
             {
                 CompMannable comp = thing.TryGetComp<CompMannable>();
@@ -235,6 +235,56 @@ namespace CombatExtended
         }
         */
 
+        public static bool IntersectRay(Bounds bounds, Ray ray, out float dist)
+        {
+            bool result = CheckLineBox(bounds.min, bounds.max, ray.origin, ray.direction * 9999, out var hit);
+            dist = hit.magnitude;
+            return result;
+        }
+
+        public static bool CheckLineBox(Vector3 B1, Vector3 B2, Vector3 L1, Vector3 L2, out Vector3 Hit)
+        {
+            Hit = Vector3.zero;
+            if (L2.x < B1.x && L1.x < B1.x) return false;
+            if (L2.x > B2.x && L1.x > B2.x) return false;
+            if (L2.y < B1.y && L1.y < B1.y) return false;
+            if (L2.y > B2.y && L1.y > B2.y) return false;
+            if (L2.z < B1.z && L1.z < B1.z) return false;
+            if (L2.z > B2.z && L1.z > B2.z) return false;
+            if (L1.x > B1.x && L1.x < B2.x &&
+                L1.y > B1.y && L1.y < B2.y &&
+                L1.z > B1.z && L1.z < B2.z)
+            {
+                Hit = L1;
+                return true;
+            }
+            if ((GetIntersection(L1.x - B1.x, L2.x - B1.x, L1, L2, ref Hit) && InBox(Hit, B1, B2, 1))
+              || (GetIntersection(L1.y - B1.y, L2.y - B1.y, L1, L2, ref Hit) && InBox(Hit, B1, B2, 2))
+              || (GetIntersection(L1.z - B1.z, L2.z - B1.z, L1, L2, ref Hit) && InBox(Hit, B1, B2, 3))
+              || (GetIntersection(L1.x - B2.x, L2.x - B2.x, L1, L2, ref Hit) && InBox(Hit, B1, B2, 1))
+              || (GetIntersection(L1.y - B2.y, L2.y - B2.y, L1, L2, ref Hit) && InBox(Hit, B1, B2, 2))
+              || (GetIntersection(L1.z - B2.z, L2.z - B2.z, L1, L2, ref Hit) && InBox(Hit, B1, B2, 3)))
+                return true;
+
+            return false;
+        }
+
+        public static bool GetIntersection(float fDst1, float fDst2, Vector3 P1, Vector3 P2, ref Vector3 Hit)
+        {
+            if ((fDst1 * fDst2) >= 0.0f) return false;
+            if (fDst1 == fDst2) return false;
+            Hit = P1 + (P2 - P1) * (-fDst1 / (fDst2 - fDst1));
+            return true;
+        }
+
+        public static bool InBox(Vector3 Hit, Vector3 B1, Vector3 B2, int Axis)
+        {
+            if (Axis == 1 && Hit.z > B1.z && Hit.z < B2.z && Hit.y > B1.y && Hit.y < B2.y) return true;
+            if (Axis == 2 && Hit.z > B1.z && Hit.z < B2.z && Hit.x > B1.x && Hit.x < B2.x) return true;
+            if (Axis == 3 && Hit.x > B1.x && Hit.x < B2.x && Hit.y > B1.y && Hit.y < B2.y) return true;
+            return false;
+        }
+
         #endregion Misc
 
         #region MoteThrower
@@ -245,14 +295,15 @@ namespace CombatExtended
                 return;
             }
             MoteThrown moteThrown = (MoteThrown)ThingMaker.MakeThing(casingMoteDef, null);
-            moteThrown.Scale = Rand.Range(0.5f, 0.3f) * size;
-            moteThrown.exactRotation = Rand.Range(-3f, 4f);
+            moteThrown.Scale = 0.4f * size;
+            moteThrown.exactRotation = 1;
             moteThrown.exactPosition = loc;
             moteThrown.airTimeLeft = 60;
-            moteThrown.SetVelocity((float)Rand.Range(160, 200), Rand.Range(0.7f, 0.5f));
+            moteThrown.SetVelocity(180, 0.6f);
             //     moteThrown.SetVelocityAngleSpeed((float)Rand.Range(160, 200), Rand.Range(0.020f, 0.0115f));
             GenSpawn.Spawn(moteThrown, loc.ToIntVec3(), map);
         }
+
         #endregion
 
         #region Physics
@@ -260,29 +311,29 @@ namespace CombatExtended
         /// Gravity constant in meters per second squared
         /// </summary>
         public const float gravityConst = 9.8f;
-		
+
         public static Bounds GetBoundsFor(IntVec3 cell, RoofDef roof)
         {
-        	if (roof == null)
-        		return new Bounds();
-        	
-        	float height = CollisionVertical.WallCollisionHeight;
-        	
-        	if (roof.isNatural)
-        		height *= CollisionVertical.NaturalRoofThicknessMultiplier;
-        	
-        	if (roof.isThickRoof)
-        		height *= CollisionVertical.ThickRoofThicknessMultiplier;
-        	
-        	height = Mathf.Max(0.1f, height - CollisionVertical.WallCollisionHeight);
-        	
-        	Vector3 center = cell.ToVector3Shifted();
-        	center.y = CollisionVertical.WallCollisionHeight + height / 2f;
-        	
-        	return new Bounds(center,
-        	                  new Vector3(1f, height, 1f));
+            if (roof == null)
+                return new Bounds();
+
+            float height = CollisionVertical.WallCollisionHeight;
+
+            if (roof.isNatural)
+                height *= CollisionVertical.NaturalRoofThicknessMultiplier;
+
+            if (roof.isThickRoof)
+                height *= CollisionVertical.ThickRoofThicknessMultiplier;
+
+            height = Mathf.Max(0.1f, height - CollisionVertical.WallCollisionHeight);
+
+            Vector3 center = cell.ToVector3Shifted();
+            center.y = CollisionVertical.WallCollisionHeight + height / 2f;
+
+            return new Bounds(center,
+                              new Vector3(1f, height, 1f));
         }
-        
+
         public static Bounds GetBoundsFor(Thing thing)
         {
             if (thing == null)
@@ -305,18 +356,18 @@ namespace CombatExtended
         /// <returns>Distance from center of Thing to its edge in cells</returns>
         public static float GetCollisionWidth(Thing thing)
         {
-        	/* Possible solution for fixing tree widths
+            /* Possible solution for fixing tree widths
 			if (thing.IsTree())
         	{
         		return (thing as Plant).def.graphicData.shadowData.volume.x;
         	}*/
-        	
+
             var pawn = thing as Pawn;
             if (pawn != null)
             {
-            	return GetCollisionBodyFactors(pawn).x;
+                return GetCollisionBodyFactors(pawn).x;
             }
-            
+
             return 1f;    //Buildings, etc. fill out a full square
         }
 
@@ -332,27 +383,28 @@ namespace CombatExtended
                 Log.Error("CE calling GetCollisionBodyHeightFactor with nullPawn");
                 return new Vector2(1, 1);
             }
-            
-        	var factors = BoundsInjector.ForPawn(pawn);
-            
+
+            var factors = BoundsInjector.ForPawn(pawn);
+
             if (pawn.GetPosture() != PawnPosture.Standing)
             {
-	            RacePropertiesExtensionCE props = pawn.def.GetModExtension<RacePropertiesExtensionCE>() ?? new RacePropertiesExtensionCE();
-	            
-	            var shape = props.bodyShape;
-	            
-	            if (shape == CE_BodyShapeDefOf.Invalid)
-	            {
-	            	Log.ErrorOnce("CE returning BodyType Undefined for pawn " + pawn.ToString(),  35000198 + pawn.GetHashCode());
-	            }
-	            
-	            factors.x *= shape.widthLaying/shape.width;
-	            factors.y *= shape.heightLaying/shape.height;
+                RacePropertiesExtensionCE props = pawn.def.GetModExtension<RacePropertiesExtensionCE>() ?? new RacePropertiesExtensionCE();
+
+                var shape = props.bodyShape;
+
+                if (shape == CE_BodyShapeDefOf.Invalid)
+                {
+                    Log.ErrorOnce("CE returning BodyType Undefined for pawn " + pawn.ToString(), 35000198 + pawn.GetHashCode());
+                }
+
+                factors.x *= shape.widthLaying / shape.width;
+                factors.y *= shape.heightLaying / shape.height;
             }
-            
+             if(pawn.ThingID.Contains("Squirrel"))
+                        Log.Message("body factors: " + factors.x + "," + factors.y + "," + (pawn.GetPosture() != PawnPosture.Standing));
             return factors;
         }
-		
+
         /// <summary>
         /// Determines whether a pawn should be currently crouching down or not
         /// </summary>
@@ -400,6 +452,99 @@ namespace CombatExtended
             {
                 TryUpdateInventory(pawn);
             }
+        }
+
+        #endregion
+
+        #region Random
+        //Encapsulating random calls to debug
+
+        public static int Range(int min, int max)
+        {
+            return min + (max - min) / 2;
+        }
+
+        public static float Range(float min, float max)
+        {
+            return min + (max - min) / 2;
+            //Rand.PushState();
+            //float value = Rand.Range(min, max);
+            //Rand.PopState();
+            //return value;
+        }
+
+        public static float Value()
+        {
+            return 0.5f;
+            //Rand.PushState();
+            //float value = Rand.Value;
+            //Rand.PopState();
+            //return value;
+        }
+
+        public static bool Chance(float v)
+        {
+            return false;
+            //Rand.PushState();
+            //bool value = Rand.Chance(v);
+            //Rand.PopState();
+            //return value;
+        }
+
+        public static Vector2 InsideUnitCircle()
+        {
+            return new Vector2(0.4f, 0.4f);
+            //Rand.PushState();
+            //Vector2 value = Rand.InsideUnitCircle;
+            //Rand.PopState();
+            //return value;
+        }
+
+        public static bool ChanceSeeded(float generateAllowChance, int v)
+        {
+            return false;
+        }
+
+        public static float ValueSeeded(int v)
+        {
+            return 0.5f;
+        }
+
+        internal static float RandomInRange(FloatRange range)
+        {
+            return Range(range.min, range.max);
+        }
+
+        internal static int RandomInRange(IntRange range)
+        {
+            return (int)Range(range.min, range.max);
+        }
+
+        public static T RandomElement<T>(IEnumerable<T> source)
+        {
+            return source.FirstOrDefault();
+        }
+
+        public static bool TryRandomElementByWeight<T>(this IEnumerable<T> source, Func<T, float> weightSelector, out T result)
+        {
+            result = source.FirstOrDefault();
+            return true;
+        }
+
+        public static T RandomElementByWeight<T>(IEnumerable<T> source, Func<T, float> weightSelector)
+        {
+            return source.FirstOrDefault();
+        }
+
+        public static bool TryRandomElement<T>(this IEnumerable<T> source, out T result)
+        {
+            result = source.FirstOrDefault();
+            return true;
+        }
+
+        internal static Rot4 RandomRot4()
+        {
+            return Rot4.South;
         }
 
         #endregion

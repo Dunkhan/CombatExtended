@@ -139,7 +139,7 @@ namespace CombatExtended
 
         public float GetRandDist()
         {
-            float dist = shotDist + UnityEngine.Random.Range(-distShift, distShift);
+            float dist = shotDist + CE_Utility.Range(-distShift, distShift);
             return dist;
         }
 
@@ -148,7 +148,7 @@ namespace CombatExtended
             Vector3 moveVec = new Vector3();
             if (targetIsMoving)
             {
-            	moveVec = (targetPawn.pather.nextCell - targetPawn.Position).ToVector3() * (leadDist + UnityEngine.Random.Range(-leadShift, leadShift));
+            	moveVec = (targetPawn.pather.nextCell - targetPawn.Position).ToVector3() * (leadDist + CE_Utility.Range(-leadShift, leadShift));
             }
             return new Vector2(moveVec.x, moveVec.z);
         }
@@ -156,7 +156,7 @@ namespace CombatExtended
         /// <returns>Angle Vector2 in degrees</returns>
         public Vector2 GetRandSpreadVec()
         {
-            Vector2 vec = UnityEngine.Random.insideUnitCircle * spreadDegrees;
+            Vector2 vec = CE_Utility.InsideUnitCircle() * spreadDegrees;
             return vec;
         }
 

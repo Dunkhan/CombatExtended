@@ -206,7 +206,7 @@ namespace CombatExtended
         {
             // Calculate deflection
             bool isSharpDmg = def.armorCategory == DamageArmorCategoryDefOf.Sharp;
-            float rand = UnityEngine.Random.Range(penAmount - PenetrationRandVariation, penAmount + PenetrationRandVariation);
+            float rand = CE_Utility.Range(penAmount - PenetrationRandVariation, penAmount + PenetrationRandVariation);
             bool deflected = isSharpDmg && armorAmount > rand;
 
             // Apply damage reduction
@@ -326,7 +326,7 @@ namespace CombatExtended
             if (pawn != null)
             {
                 // Pawns run their own armor calculations
-                dinfo.SetAmount(Mathf.CeilToInt(dinfo.Amount * Rand.Range(0f, 0.5f)));
+                dinfo.SetAmount(Mathf.CeilToInt(dinfo.Amount * CE_Utility.Range(0f, 0.5f)));
                 pawn.TakeDamage(dinfo);
             }
             else if (dinfo.IsAmbientDamage())

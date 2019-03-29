@@ -37,7 +37,7 @@ namespace CombatExtended
             if (this.onHead)
             {
             	Log.ErrorOnce(string.Concat("CombatExtended :: Apparel_VisibleAccessory: The head drawing code is incomplete and the apparel '",
-            	                            this.Label, "' will not be drawn."), this.def.debugRandomId);
+            	                            this.Label, "' will not be drawn."), 1);
             	return;
             }
             
@@ -119,7 +119,7 @@ namespace CombatExtended
         {
             if (Wearer == null)
             {
-                return Rot4.Random;
+                return CE_Utility.RandomRot4();
             }
             if (Wearer.GetPosture() == PawnPosture.LayingOnGroundFaceUp)
             {
@@ -153,7 +153,7 @@ namespace CombatExtended
                         return Rot4.West;
                 }
             }
-            return Rot4.Random;
+            return CE_Utility.RandomRot4();
         }
 		
 		//Utility, return if the apparel is worn on the head/body.        

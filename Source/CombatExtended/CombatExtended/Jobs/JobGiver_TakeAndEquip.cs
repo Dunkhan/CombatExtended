@@ -170,10 +170,10 @@ namespace CombatExtended
                 return null;
             }
 
-            if (!Rand.MTBEventOccurs(60, 1, 30))
-            {
-                return null;
-            }
+            //if (!Rand.MTBEventOccurs(60, 1, 30))
+            //{
+            //    return null;
+            //}
 
             // Log.Message(pawn.ToString() +  " - priority:" + (GetPriorityWork(pawn)).ToString() + " capacityWeight: " + pawn.TryGetComp<CompInventory>().capacityWeight.ToString() + " currentWeight: " + pawn.TryGetComp<CompInventory>().currentWeight.ToString() + " capacityBulk: " + pawn.TryGetComp<CompInventory>().capacityBulk.ToString() + " currentBulk: " + pawn.TryGetComp<CompInventory>().currentBulk.ToString());
 
@@ -232,7 +232,7 @@ namespace CombatExtended
                     Thing WrongammoThing = null;
                     WrongammoThing = primaryammouser != null
                         ? inventory.ammoList.Find(thing => !primaryammouser.Props.ammoSet.ammoTypes.Any(a => a.ammo == thing.def))
-                        : inventory.ammoList.RandomElement<Thing>();
+                        : CE_Utility.RandomElement(inventory.ammoList);
 
                     if (WrongammoThing != null)
                     {
@@ -577,7 +577,7 @@ namespace CombatExtended
         {
             if (!pawn.CanReserve(blocker, 1))
             {
-                return new Job(JobDefOf.Goto, CellFinder.RandomClosewalkCellNear(cellBeforeBlocker, pawn.Map, 10), 100, true);
+                return new Job(JobDefOf.Goto, cellBeforeBlocker, 100, true);
             }
             return new Job(JobDefOf.AttackMelee, blocker)
             {

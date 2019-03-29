@@ -173,7 +173,7 @@ namespace CombatExtended
         public override void WarmupComplete()
         {
             // attack shooting expression
-            if ((ShooterPawn?.Spawned ?? false) && currentTarget.Thing is Pawn && Rand.Chance(0.25f))
+            if ((ShooterPawn?.Spawned ?? false) && currentTarget.Thing is Pawn && CE_Utility.Chance(0.25f))
             {
                 var tauntThrower = (TauntThrower)ShooterPawn.Map.GetComponent(typeof(TauntThrower));
                 tauntThrower?.TryThrowTaunt(CE_RulePackDefOf.AttackMote, ShooterPawn);
@@ -317,9 +317,8 @@ namespace CombatExtended
             }
             */
             float recoilMagnitude = Mathf.Pow((5 - ShootingAccuracy), (Mathf.Min(10, numShotsFired) / 6.25f));
-
-            rotation += recoilMagnitude * UnityEngine.Random.Range(minX, maxX);
-            angle += Mathf.Deg2Rad * recoilMagnitude * UnityEngine.Random.Range(minY, maxY);
+            rotation += recoilMagnitude * CE_Utility.Range(minX, maxX);
+            angle += Mathf.Deg2Rad * recoilMagnitude * CE_Utility.Range(minY, maxY);
         }
 
         /// <summary>

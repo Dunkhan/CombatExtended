@@ -550,7 +550,7 @@ namespace CombatExtended
             var bounds = CE_Utility.GetBoundsFor(cell, cell.GetRoof(Map));
 
             float dist;
-            if (!bounds.IntersectRay(ShotLine, out dist))
+            if (CE_Utility.IntersectRay(bounds, ShotLine, out dist))
             {
                 return false;
             }
@@ -578,16 +578,19 @@ namespace CombatExtended
         {
             if (thing == launcher && !canTargetSelf)
             {
+                Log.Message("cant target self");
                 return false;
             }
 
             var bounds = CE_Utility.GetBoundsFor(thing);
-            if (!bounds.IntersectRay(ShotLine, out var dist))
+            if (CE_Utility.IntersectRay(bounds, ShotLine, out var dist))
             {
+                Log.Message("ray does not intersect");
                 return false;
             }
             if (dist * dist > ExactMinusLastPos.sqrMagnitude)
             {
+                Log.Message("distance too far");
                 return false;
             }
 
@@ -598,7 +601,10 @@ namespace CombatExtended
                 var accuracyFactor = def.projectile.alwaysFreeIntercept ? 1 : (thing.Position - OriginIV3).LengthHorizontal / 40 * AccuracyFactor;
                 var chance = thing.def.fillPercent * accuracyFactor;
                 if (Controller.settings.DebugShowTreeCollisionChance) MoteMaker.ThrowText(thing.Position.ToVector3Shifted(), thing.Map, chance.ToString());
-                if (!Rand.Chance(chance)) return false;
+                if (!CE_Utility.Chance(chance))
+                {
+                    return false;
+                }
             }
 
             var point = ShotLine.GetPoint(dist);
@@ -722,7 +728,7 @@ namespace CombatExtended
         #region Impact
         //Modified collision with downed pawns
         private void ImpactSomething()
-        {
+        {   
             var pos = ExactPosition.ToIntVec3();
 
             //Not modified, just mortar code
@@ -780,7 +786,7 @@ namespace CombatExtended
                 && Position.IsValid
                 && def.projectile.preExplosionSpawnChance > 0
                 && def.projectile.preExplosionSpawnThingDef != null
-                && Rand.Value < def.projectile.preExplosionSpawnChance)
+                && CE_Utility.Value() < def.projectile.preExplosionSpawnChance)
             {
                 var thingDef = def.projectile.preExplosionSpawnThingDef;
 
